@@ -1,5 +1,15 @@
 # @sd-jwt/sd-jwt-vc
 
+## 0.21.2
+
+### Patch Changes
+
+- 1cd910e: Scope `expectedIssuer`, `expectedSubject`, `expectedVct`, and `maxAgeSeconds` to the issuer-signed SD-JWT payload rather than applying them to the Key Binding JWT or Status List Token. Credential `expectedAudience` and `allowedIssuerAlgorithms` no longer constrain the Key Binding JWT. Use `expectedKeyBindingAudience` to constrain the Key Binding JWT's audience. Issuer algorithm restrictions no longer constrain the Status List Token and its signature remains verified by the configured status verifier.
+- Updated dependencies [1cd910e]
+  - @sd-jwt/core@0.21.2
+  - @owf/identity-common@0.4.2
+  - @owf/token-status-list@0.4.2
+
 ## 0.21.1
 
 ### Patch Changes

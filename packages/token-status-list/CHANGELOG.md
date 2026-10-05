@@ -1,5 +1,12 @@
 # @owf/token-status-list
 
+## 0.4.2
+
+### Patch Changes
+
+- @owf/cose@0.4.2
+  - @owf/identity-common@0.4.2
+
 ## 0.4.1
 
 ### Patch Changes

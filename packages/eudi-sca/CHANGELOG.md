@@ -1,5 +1,15 @@
 # @owf/eudi-sca
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [1cd910e]
+  - @sd-jwt/core@0.21.2
+  - @owf/crypto@0.4.2
+  - @owf/identity-common@0.4.2
+  - @openid4vc/openid4vci@0.6.1
+
 ## 0.4.1
 
 ### Patch Changes
