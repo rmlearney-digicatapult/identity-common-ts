@@ -1,5 +1,5 @@
 import { type CallbackContext, Oauth2ErrorCodes, Oauth2ServerErrorResponseError } from '@openid4vc/oauth2'
-import { CommonMediaTypes, isMediaType, ValidationError } from '@owf/identity-common'
+import { CommonMediaTypes, isMediaType } from '@owf/identity-common'
 import type { IssuerMetadataResult } from '../metadata/fetch-issuer-metadata'
 import { Openid4vciVersion } from '../version'
 import { type CredentialRequestBodyOptions, decryptCredentialRequest } from './decrypt-credential-request'
@@ -48,25 +48,15 @@ function validatePlaintextCredentialRequestEncryption(options: {
   }
 }
 
-function parseRequestPayload<TOptions, TResult>(
-  parse: (options: TOptions) => TResult,
-  options: TOptions,
-  internalMessage: string
-): TResult {
+function parseRequestPayload<TOptions, TResult>(parse: (options: TOptions) => TResult, options: TOptions): TResult {
   try {
     return parse(options)
   } catch (error) {
     if (error instanceof Oauth2ServerErrorResponseError) throw error
 
-    throw new Oauth2ServerErrorResponseError(
-      {
-        error: Oauth2ErrorCodes.InvalidCredentialRequest,
-        error_description: error instanceof ValidationError ? error.message : 'Invalid request',
-      },
-      {
-        internalMessage,
-        cause: error,
-      }
+    throw Oauth2ServerErrorResponseError.fromError(
+      { error: Oauth2ErrorCodes.InvalidCredentialRequest, error_description: 'Invalid credential request.' },
+      error
     )
   }
 }
@@ -94,22 +84,20 @@ export async function parseCredentialRequest(
       issuerMetadata: options.issuerMetadata,
       callbacks: options.callbacks,
     })
-    return parseRequestPayload(
-      parseCredentialRequestPayload,
-      { issuerMetadata: options.issuerMetadata, credentialRequest },
-      'Error verifying credential request proof jwt'
-    )
+    return parseRequestPayload(parseCredentialRequestPayload, {
+      issuerMetadata: options.issuerMetadata,
+      credentialRequest,
+    })
   }
 
   if (isMediaType(options.contentType, CommonMediaTypes.Json)) {
     if (options.issuerMetadata.credentialIssuer.credential_request_encryption?.encryption_required) {
       throw credentialRequestEncryptionRequired()
     }
-    const parsedCredentialRequest = parseRequestPayload(
-      parseCredentialRequestPayload,
-      { issuerMetadata: options.issuerMetadata, credentialRequest: options.body },
-      'Error verifying credential request proof jwt'
-    )
+    const parsedCredentialRequest = parseRequestPayload(parseCredentialRequestPayload, {
+      issuerMetadata: options.issuerMetadata,
+      credentialRequest: options.body,
+    })
     validatePlaintextCredentialRequestEncryption({
       issuerMetadata: options.issuerMetadata,
       hasCredentialResponseEncryption: parsedCredentialRequest.credentialResponseEncryption !== undefined,
@@ -129,22 +117,20 @@ export async function parseDeferredCredentialRequest(
       issuerMetadata: options.issuerMetadata,
       callbacks: options.callbacks,
     })
-    return parseRequestPayload(
-      parseDeferredCredentialRequestPayload,
-      { issuerMetadata: options.issuerMetadata, deferredCredentialRequest: credentialRequest },
-      'Error parsing deferred credential request'
-    )
+    return parseRequestPayload(parseDeferredCredentialRequestPayload, {
+      issuerMetadata: options.issuerMetadata,
+      deferredCredentialRequest: credentialRequest,
+    })
   }
 
   if (isMediaType(options.contentType, CommonMediaTypes.Json)) {
     if (options.issuerMetadata.credentialIssuer.credential_request_encryption?.encryption_required) {
       throw credentialRequestEncryptionRequired()
     }
-    const parsedDeferredCredentialRequest = parseRequestPayload(
-      parseDeferredCredentialRequestPayload,
-      { issuerMetadata: options.issuerMetadata, deferredCredentialRequest: options.body },
-      'Error parsing deferred credential request'
-    )
+    const parsedDeferredCredentialRequest = parseRequestPayload(parseDeferredCredentialRequestPayload, {
+      issuerMetadata: options.issuerMetadata,
+      deferredCredentialRequest: options.body,
+    })
     validatePlaintextCredentialRequestEncryption({
       issuerMetadata: options.issuerMetadata,
       hasCredentialResponseEncryption:

@@ -29,14 +29,14 @@ describe('parseTransactionData', () => {
     }
   })
 
-  test('lists the issues of an entry that does not validate in the error_description', () => {
+  test('names the issues of an entry that does not validate in the error_description', () => {
     const transactionData = base64urlEncode(JSON.stringify({ type: 'qes' }))
 
     expect(() => parseTransactionData({ transactionData: [transactionData] })).toThrow(
       expect.objectContaining({
         errorResponse: {
           error: Oauth2ErrorCodes.InvalidTransactionData,
-          error_description: expect.stringContaining('0.credential_ids: '),
+          error_description: expect.stringContaining('0.credential_ids (missing_value)'),
         },
       })
     )

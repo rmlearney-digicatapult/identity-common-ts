@@ -7,7 +7,7 @@ import {
   validateJarRequestParams,
   zJarRequestObjectPayload,
 } from '@openid4vc/oauth2'
-import { isJwtTyp, validationErrorMessage } from '@owf/identity-common'
+import { isJwtTyp } from '@owf/identity-common'
 import {
   type DecodeJwtResult,
   decodeJwt,
@@ -207,12 +207,9 @@ function withUnverifiedAuthorizationRequest(error: unknown, requestObject: strin
           )
         : // e.g. a request object that is expired or not yet valid
           error instanceof JoseValidationError
-          ? new Oauth2ServerErrorResponseError(
-              {
-                error: Oauth2ErrorCodes.InvalidRequestObject,
-                error_description: validationErrorMessage('The request object is not valid.', error.issues),
-              },
-              { cause: error, internalMessage: error.message }
+          ? Oauth2ServerErrorResponseError.fromError(
+              { error: Oauth2ErrorCodes.InvalidRequestObject, error_description: 'The request object is not valid.' },
+              error
             )
           : undefined
   if (!serverError) return error

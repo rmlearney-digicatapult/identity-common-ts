@@ -1,6 +1,6 @@
 import { Oauth2ErrorCodes, Oauth2ServerErrorResponseError } from '@openid4vc/oauth2'
 import { parseIfJson } from '@openid4vc/utils'
-import { base64, bytesToString, parseWithSchema, validationErrorMessage } from '@owf/identity-common'
+import { base64, bytesToString, parseWithSchema } from '@owf/identity-common'
 import { type TransactionDataEntry, zTransactionData } from './z-transaction-data'
 
 export interface ParseTransactionDataOptions {
@@ -34,10 +34,10 @@ export function parseTransactionData(options: ParseTransactionDataOptions): Pars
 
   const parsedResult = parseWithSchema(zTransactionData, decoded)
   if (!parsedResult.success) {
-    throw new Oauth2ServerErrorResponseError({
-      error: Oauth2ErrorCodes.InvalidTransactionData,
-      error_description: validationErrorMessage('Failed to parse transaction data.', parsedResult.issues),
-    })
+    throw Oauth2ServerErrorResponseError.fromValidationIssues(
+      { error: Oauth2ErrorCodes.InvalidTransactionData, error_description: 'Failed to parse transaction data.' },
+      parsedResult.issues
+    )
   }
 
   return parsedResult.data.map((decoded, index) => ({

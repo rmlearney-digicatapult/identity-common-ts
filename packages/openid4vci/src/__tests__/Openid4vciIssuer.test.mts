@@ -107,6 +107,25 @@ describe('Openid4vciIssuer', () => {
     )
   })
 
+  // RFC 6749 Section 5.2: error_description only allows printable ASCII without '"' and '\'
+  test('parseCredentialRequest keeps a key of the request out of the error_description', async () => {
+    const error = await issuer
+      .parseCredentialRequest({
+        issuerMetadata: { ...issuerMetadata, originalDraftVersion: Openid4vciVersion.Draft15 },
+        credentialRequest: {
+          credential_configuration_id: 'not-offered',
+          proofs: { 'jwt"\r\n2026-11-24T00:00:00Z ERROR a line of the request': [] },
+        },
+        contentType: CommonMediaTypes.Json,
+      })
+      .catch((error) => error)
+
+    expect(error.errorResponse).toEqual({
+      error: 'invalid_credential_request',
+      error_description: 'Invalid credential request. Errors: proofs.* (too_small).',
+    })
+  })
+
   test('parseNotificationRequest returns the validated notification request', () => {
     expect(
       issuer.parseNotificationRequest({
@@ -295,11 +314,8 @@ describe('Openid4vciIssuer', () => {
         keyAttestationsRequired: { key_storage: ['iso_18045_moderate'] },
       })
     ).rejects.toMatchObject({
-      errorResponse: {
-        error: 'invalid_proof',
-        error_description:
-          "Key attestation 'key_storage' values 'iso_18045_high' do not match any of the values accepted by the credential issuer: 'iso_18045_moderate'",
-      },
+      errorResponse: { error: 'invalid_proof', error_description: 'Invalid proof.' },
+      message: expect.stringContaining("Key attestation 'key_storage' values"),
     })
 
     // Key attestation is required, but the proof does not contain one
@@ -324,11 +340,10 @@ describe('Openid4vciIssuer', () => {
         keyAttestationsRequired: {},
       })
     ).rejects.toMatchObject({
-      errorResponse: {
-        error: 'invalid_proof',
-        error_description:
-          'A key attestation is required by the credential issuer, but no key attestation was provided',
-      },
+      errorResponse: { error: 'invalid_proof', error_description: 'Invalid proof.' },
+      message: expect.stringContaining(
+        'A key attestation is required by the credential issuer, but no key attestation was provided'
+      ),
     })
 
     // The requirements are also verified for the attestation proof type
@@ -448,7 +463,7 @@ describe('Openid4vciIssuer', () => {
 
       expect(error.errorResponse).toEqual({
         error: 'invalid_proof',
-        error_description: 'Invalid JWS protected header\n  - typ: typ must be openid4vci-proof+jwt (invalid_typ)',
+        error_description: 'Invalid proof. Errors: typ (invalid_typ).',
       })
     })
 

@@ -56,8 +56,12 @@ export function verifyCredentialRequestEncryption(
       headerSchema: zCredentialRequestJweHeader,
     }).header
   } catch (error) {
-    throw invalidEncryptionParameters(
-      `Unable to decode credential request JWE header: ${error instanceof Error ? error.message : 'invalid header'}`
+    throw Oauth2ServerErrorResponseError.fromError(
+      {
+        error: Oauth2ErrorCodes.InvalidEncryptionParameters,
+        error_description: 'Unable to decode credential request JWE header.',
+      },
+      error
     )
   }
 

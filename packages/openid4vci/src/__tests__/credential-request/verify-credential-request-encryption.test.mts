@@ -89,7 +89,9 @@ describe('verifyCredentialRequestEncryption', () => {
       expect.objectContaining({
         errorResponse: expect.objectContaining({
           error: 'invalid_encryption_parameters',
-          error_description: expect.stringContaining('Unable to decode credential request JWE header:'),
+          error_description: expect.stringMatching(
+            /^Unable to decode credential request JWE header\. Errors: (kid|alg) \((too_small|invalid_value)\)\.$/
+          ),
         }),
       })
     )

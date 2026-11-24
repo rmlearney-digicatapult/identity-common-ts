@@ -1,5 +1,5 @@
 import { Oauth2ErrorCodes, Oauth2ServerErrorResponseError } from '@openid4vc/oauth2'
-import { parseWithErrorHandling, ValidationError } from '@owf/identity-common'
+import { parseWithErrorHandling } from '@owf/identity-common'
 import { type NotificationRequest, zNotificationRequest } from './z-notification'
 
 export interface ParseNotificationRequestOptions {
@@ -26,15 +26,9 @@ export function parseNotificationRequest(options: ParseNotificationRequestOption
 
     return { notificationRequest }
   } catch (error) {
-    throw new Oauth2ServerErrorResponseError(
-      {
-        error: Oauth2ErrorCodes.InvalidNotificationRequest,
-        error_description: error instanceof ValidationError ? error.message : 'Invalid notification request',
-      },
-      {
-        internalMessage: 'Error parsing notification request',
-        cause: error,
-      }
+    throw Oauth2ServerErrorResponseError.fromError(
+      { error: Oauth2ErrorCodes.InvalidNotificationRequest, error_description: 'Invalid notification request.' },
+      error
     )
   }
 }

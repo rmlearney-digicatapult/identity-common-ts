@@ -1,8 +1,6 @@
 import {
   type CallbackContext,
   JoseInvalidArgumentError,
-  JoseValidationError,
-  JoseVerificationError,
   Oauth2AuthorizationServer,
   Oauth2ErrorCodes,
   Oauth2ServerErrorResponseError,
@@ -20,7 +18,6 @@ import type { CredentialRequestBodyOptions } from './credential-request/decrypt-
 import { parseCredentialRequest, parseDeferredCredentialRequest } from './credential-request/parse-credential-request'
 import type { ParseCredentialRequestReturn } from './credential-request/parse-credential-request-payload'
 import type { ParseDeferredCredentialRequestReturn } from './credential-request/parse-deferred-credential-request-payload'
-import { Openid4vciError } from './error/Openid4vciError'
 import {
   type VerifyCredentialRequestAttestationProofOptions,
   verifyCredentialRequestAttestationProof,
@@ -184,22 +181,9 @@ export class Openid4vciIssuer {
     } catch (error) {
       // A wrong option, such as a negative skew, is a mistake of the issuer, not of the proof
       if (error instanceof JoseInvalidArgumentError) throw error
-      throw new Oauth2ServerErrorResponseError(
-        {
-          error: Oauth2ErrorCodes.InvalidProof,
-          error_description:
-            // TODO: error should have a internalErrorMessage and a publicErrorMessage
-            error instanceof JoseVerificationError ||
-            error instanceof JoseValidationError ||
-            error instanceof Openid4vciError
-              ? error.message
-              : 'Invalid proof',
-        },
-
-        {
-          internalMessage: 'Error verifying credential request proof jwt',
-          cause: error,
-        }
+      throw Oauth2ServerErrorResponseError.fromError(
+        { error: Oauth2ErrorCodes.InvalidProof, error_description: 'Invalid proof.' },
+        error
       )
     }
   }
@@ -234,22 +218,9 @@ export class Openid4vciIssuer {
     } catch (error) {
       // A wrong option, such as a negative skew, is a mistake of the issuer, not of the proof
       if (error instanceof JoseInvalidArgumentError) throw error
-      throw new Oauth2ServerErrorResponseError(
-        {
-          error: Oauth2ErrorCodes.InvalidProof,
-          error_description:
-            // TODO: error should have a internalErrorMessage and a publicErrorMessage
-            error instanceof JoseVerificationError ||
-            error instanceof JoseValidationError ||
-            error instanceof Openid4vciError
-              ? error.message
-              : 'Invalid proof',
-        },
-
-        {
-          internalMessage: 'Error verifying credential request proof attestation',
-          cause: error,
-        }
+      throw Oauth2ServerErrorResponseError.fromError(
+        { error: Oauth2ErrorCodes.InvalidProof, error_description: 'Invalid proof.' },
+        error
       )
     }
   }
@@ -273,15 +244,9 @@ export class Openid4vciIssuer {
         now: options.now,
       })
     } catch (error) {
-      throw new Oauth2ServerErrorResponseError(
-        {
-          error: Oauth2ErrorCodes.InvalidProof,
-          error_description: error instanceof Openid4vciError ? error.message : 'Invalid proof',
-        },
-        {
-          internalMessage: 'Error verifying credential request di_vp proof',
-          cause: error,
-        }
+      throw Oauth2ServerErrorResponseError.fromError(
+        { error: Oauth2ErrorCodes.InvalidProof, error_description: 'Invalid proof.' },
+        error
       )
     }
   }
