@@ -312,15 +312,10 @@ export async function verifyClientAttestation({
     // Covers Oauth2Error, the jose errors and a ValidationError for a malformed client attestation. A wrong
     // option, such as a negative skew, is a mistake of the server, not of the client.
     if (error instanceof IdentityError && !(error instanceof JoseInvalidArgumentError)) {
-      throw new Oauth2ServerErrorResponseError(
-        {
-          error: Oauth2ErrorCodes.InvalidClient,
-          error_description: `Error verifying client attestation. ${error.message}`,
-        },
-        {
-          status: 401,
-          cause: error,
-        }
+      throw Oauth2ServerErrorResponseError.fromError(
+        { error: Oauth2ErrorCodes.InvalidClient, error_description: 'Error verifying client attestation.' },
+        error,
+        { status: 401 }
       )
     }
 

@@ -21,7 +21,7 @@ describe('Parse Pushed Authorization Response', () => {
         parsePushedAuthorizationRequestUriReferenceValue({
           uri: 'foo bar',
         })
-      ).toThrow(`The 'request_uri' must start with the prefix "urn:ietf:params:oauth:request_uri:".`)
+      ).toThrow(`The 'request_uri' must start with the prefix 'urn:ietf:params:oauth:request_uri:'.`)
     })
   })
 
@@ -64,7 +64,8 @@ describe('Parse Pushed Authorization Response', () => {
       expect(error).toBeInstanceOf(Oauth2ServerErrorResponseError)
       expect(error.errorResponse).toEqual({
         error: 'invalid_request',
-        error_description: 'Invalid authorization request. Could not parse authorization request or jar.',
+        error_description:
+          'Invalid authorization request. Could not parse authorization request or jar. Errors: missing_value.',
       })
       expect(error.message).toContain('\n  - ')
     })
@@ -117,7 +118,8 @@ describe('Parse Pushed Authorization Response', () => {
       expect(error).toBeInstanceOf(Oauth2ServerErrorResponseError)
       expect(error.errorResponse).toEqual({
         error: 'invalid_request_object',
-        error_description: 'Invalid authorization request. Could not parse jar request payload.',
+        error_description:
+          'Invalid authorization request. Could not parse jar request payload. Errors: response_type (missing_value).',
       })
     })
   })

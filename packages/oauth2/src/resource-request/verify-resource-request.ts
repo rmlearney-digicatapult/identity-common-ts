@@ -1,5 +1,4 @@
-import { Openid4vcBaseError } from '@openid4vc/utils'
-import { IdentityError, ValidationError } from '@owf/identity-common'
+import { ValidationError } from '@owf/identity-common'
 import { decodeJwt, JoseInvalidArgumentError, JoseParseError, type Jwk } from '@owf/jose'
 import { introspectToken } from '../access-token/introspect-token'
 import { SupportedAuthenticationScheme, verifyJwtProfileAccessToken } from '../access-token/verify-access-token'
@@ -13,6 +12,7 @@ import type { CallbackContext } from '../callbacks'
 import type { RequestLike } from '../common/z-common'
 import { Oauth2ErrorCodes } from '../common/z-oauth2-error'
 import { type DpopVerificationOptions, extractDpopJwtFromHeaders, verifyDpopJwt } from '../dpop/dpop'
+import { errorDescriptionOf } from '../error/error-description'
 import { Oauth2Error } from '../error/Oauth2Error'
 import { Oauth2ResourceUnauthorizedError } from '../error/Oauth2ResourceUnauthorizedError'
 import {
@@ -133,18 +133,12 @@ export async function verifyResourceRequest(options: VerifyResourceRequestOption
         allowedSkewInSeconds: options.allowedSkewInSeconds,
       }).catch((error) => {
         if (error instanceof JoseInvalidArgumentError) throw error
-        // The message of an error raised while fetching from the authorization server, such as its JWKS,
-        // holds what that server responded with, which is not for the client: it gets a generic description
-        const errorMessage =
-          error instanceof IdentityError && !(error instanceof Openid4vcBaseError)
-            ? error.message
-            : 'Invalid access token'
         throw new Oauth2ResourceUnauthorizedError(
           `Error occurred during verification of jwt profile access token: ${error.message}`,
           {
             scheme,
             error: Oauth2ErrorCodes.InvalidToken,
-            error_description: errorMessage,
+            error_description: errorDescriptionOf('Invalid access token.', error),
           },
           { cause: error }
         )
@@ -249,13 +243,12 @@ export async function verifyResourceRequest(options: VerifyResourceRequestOption
       dpopJwk = decodedDpopJwt.header.jwk
     } catch (error) {
       if (error instanceof JoseInvalidArgumentError) throw error
-      const errorMessage = error instanceof IdentityError ? error.message : 'Error verifying DPoP jwt'
       throw new Oauth2ResourceUnauthorizedError(
         `Error occurred during verification of jwt profile access token: ${error instanceof Error ? error.message : error}`,
         {
           scheme,
           error: Oauth2ErrorCodes.InvalidDpopProof,
-          error_description: errorMessage,
+          error_description: errorDescriptionOf('Invalid DPoP proof.', error),
         },
         { cause: error }
       )

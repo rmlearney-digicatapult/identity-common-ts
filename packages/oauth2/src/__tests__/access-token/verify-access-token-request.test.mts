@@ -304,9 +304,10 @@ describe('Verify Pre Authorized Code Access Token Request', () => {
           clientAttestationPopJwt: 'something-else',
         },
       })
-    ).rejects.toThrow(
-      'Error verifying client attestation. Unable to parse the JWS, a compact JWS must consist of exactly three parts'
-    )
+    ).rejects.toMatchObject({
+      errorResponse: { error: 'invalid_client', error_description: 'Error verifying client attestation.' },
+      message: expect.stringContaining('Unable to parse the JWS, a compact JWS must consist of exactly three parts'),
+    })
   })
 
   test('handles valid pre-authorized code access token request', async () => {
@@ -619,9 +620,10 @@ describe('Verify Authorization Code Access Token Request', () => {
           clientAttestationPopJwt: 'something-else',
         },
       })
-    ).rejects.toThrow(
-      'Error verifying client attestation. Unable to parse the JWS, a compact JWS must consist of exactly three parts'
-    )
+    ).rejects.toMatchObject({
+      errorResponse: { error: 'invalid_client', error_description: 'Error verifying client attestation.' },
+      message: expect.stringContaining('Unable to parse the JWS, a compact JWS must consist of exactly three parts'),
+    })
   })
 
   test('handles valid authorization code request', async () => {
@@ -879,9 +881,10 @@ describe('Verify Refresh Token Access Token Request', () => {
           clientAttestationPopJwt: 'something-else',
         },
       })
-    ).rejects.toThrow(
-      'Error verifying client attestation. Unable to parse the JWS, a compact JWS must consist of exactly three parts'
-    )
+    ).rejects.toMatchObject({
+      errorResponse: { error: 'invalid_client', error_description: 'Error verifying client attestation.' },
+      message: expect.stringContaining('Unable to parse the JWS, a compact JWS must consist of exactly three parts'),
+    })
   })
 
   test('handles valid authorization code request', async () => {
@@ -1060,10 +1063,11 @@ describe('Verify client instance key of Access Token Request', () => {
     ).rejects.toMatchObject({
       errorResponse: {
         error: Oauth2ErrorCodes.InvalidClient,
-        error_description: expect.stringContaining(
-          'does not match the expected jwk thumbprint. Use the same client instance key for all requests.'
-        ),
+        error_description: 'Error verifying client attestation.',
       },
+      message: expect.stringContaining(
+        'does not match the expected jwk thumbprint. Use the same client instance key for all requests.'
+      ),
     })
   })
 

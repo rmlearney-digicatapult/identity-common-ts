@@ -272,12 +272,9 @@ export async function verifyDpopJwt(options: VerifyDpopJwtOptions) {
   } catch (error) {
     // A wrong option, such as a negative skew, is a mistake of the server, not of the proof
     if (error instanceof IdentityError && !(error instanceof JoseInvalidArgumentError)) {
-      throw new Oauth2ServerErrorResponseError(
-        {
-          error: Oauth2ErrorCodes.InvalidDpopProof,
-          error_description: error.message,
-        },
-        { cause: error }
+      throw Oauth2ServerErrorResponseError.fromError(
+        { error: Oauth2ErrorCodes.InvalidDpopProof, error_description: 'Invalid DPoP proof.' },
+        error
       )
     }
 

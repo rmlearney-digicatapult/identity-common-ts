@@ -138,7 +138,7 @@ export function parsePushedAuthorizationRequestUriReferenceValue(
   if (!options.uri.startsWith(pushedAuthorizationRequestUriPrefix)) {
     throw new Oauth2ServerErrorResponseError({
       error: Oauth2ErrorCodes.InvalidRequest,
-      error_description: `The 'request_uri' must start with the prefix "${pushedAuthorizationRequestUriPrefix}".`,
+      error_description: `The 'request_uri' must start with the prefix '${pushedAuthorizationRequestUriPrefix}'.`,
     })
   }
 

@@ -40,7 +40,8 @@ describe('Parse Access Token Request', () => {
 
     expect(error.errorResponse).toEqual({
       error: 'invalid_request',
-      error_description: 'Error occurred during validation of authorization request.',
+      error_description:
+        'Error occurred during validation of authorization request. Errors: grant_type (missing_value).',
     })
     expect(error.message).toContain('\n  - ')
   })
